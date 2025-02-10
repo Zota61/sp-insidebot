@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  linebot-nodejs:
+    container_name: linebot-nodejs
+    build:
+      context: .
+      dockerfile: nodejs/Dockerfile
+    restart: always
+    ports:
+      - '80:80'
+    depends_on:
+      - linebot-mysql
+    networks:
+      - linebot
+    command: ["node", "index.js"]
+
+  linebot-mysql:
+    container_name: linebot-mysql
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: sp16510726
+      MYSQL_DATABASE: equipment_db
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: always
+    ports:
+      - '127.0.0.1:3308:3306'
+    networks:
+      - linebot
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  linebot:
+    driver: bridge
