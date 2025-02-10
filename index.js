@@ -66,13 +66,13 @@ async function handleUserPermission(userMessage, userId) {
   // **處理管理員相關指令**
   if (userMessage === "查看管理者" || userMessage === "3️⃣ 查看管理者") {
     if (!dynamicAdmins.has(userId)) {
-      result = "❌ 你沒有權限查看管理者。";
+      return "❌ 你沒有權限查看管理者。";
     }
 
     const adminList = Array.from(dynamicAdmins)
       .map((admin, index) => `#${index + 1} - ${admin}`)
       .join("\n");
-    result = `👮‍♂️ **目前管理員列表**：\n${adminList || "⚠️ 尚無管理員"}`;
+    return `👮‍♂️ **目前管理員列表**：\n${adminList || "⚠️ 尚無管理員"}`;
   }
 
   // **新增管理員（限開發者）**
@@ -81,21 +81,21 @@ async function handleUserPermission(userMessage, userId) {
     userMessage.startsWith("4️⃣ 新增管理 ")
   ) {
     if (userId !== DEVELOPER_USER_ID) {
-      result = "❌ 你沒有權限新增管理員。";
+      return "❌ 你沒有權限新增管理員。";
     }
 
     const parts = userMessage.split(" ");
     if (parts.length < 2) {
-      result = "⚠️ 格式錯誤！請使用「新增管理 {UserID}」";
+      return "⚠️ 格式錯誤！請使用「新增管理 {UserID}」";
     }
 
     const newAdminId = parts[1];
     if (dynamicAdmins.has(newAdminId)) {
-      result = "⚠️ 該使用者已經是管理員！";
+      return "⚠️ 該使用者已經是管理員！";
     }
 
     dynamicAdmins.add(newAdminId);
-    result = `✅ 已成功新增管理員：${newAdminId}`;
+    return `✅ 已成功新增管理員：${newAdminId}`;
   }
 
   // **移除管理員（限開發者）**
@@ -104,26 +104,26 @@ async function handleUserPermission(userMessage, userId) {
     userMessage.startsWith("5️⃣ 移除管理 ")
   ) {
     if (userId !== DEVELOPER_USER_ID) {
-      result = "❌ 你沒有權限移除管理員。";
+      return "❌ 你沒有權限移除管理員。";
     }
 
     const parts = userMessage.split(" ");
     if (parts.length < 2) {
-      result = "⚠️ 格式錯誤！請使用「移除管理 {UserID}」";
+      return "⚠️ 格式錯誤！請使用「移除管理 {UserID}」";
     }
 
     const removeAdminId = parts[1];
     if (!dynamicAdmins.has(removeAdminId)) {
-      result = "⚠️ 該使用者不是管理員！";
+      return "⚠️ 該使用者不是管理員！";
     }
 
     dynamicAdmins.delete(removeAdminId);
-    result = `✅ 已成功移除管理員：${removeAdminId}`;
+    return `✅ 已成功移除管理員：${removeAdminId}`;
   }
 
   // **查看自己的 LINE User ID**
   if (userMessage === "我的ID" || userMessage === "6️⃣ 我的ID") {
-    result = `👤 **你的 LINE User ID**：\n${userId}`;
+    return `👤 **你的 LINE User ID**：\n${userId}`;
   }
 
   return result;
