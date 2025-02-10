@@ -513,6 +513,20 @@ async function handleEvent(event) {
         let { 上次保養時數: lastMaintenanceHours } = rows[0] || {};
         const lastMaintenanceHoursNum = parseInt(lastMaintenanceHours, 10) || 0;
 
+        const [deviceRows] = await db.query(
+          "SELECT 設備編號, 上次保養時數 FROM 設備資料表 WHERE 設備編號 = ?",
+          [equipmentId]
+        );
+        lastMaintenanceHours = parseInt(deviceRows[0].上次保養時數, 10) || 0;
+
+        // 確保新的運轉時數比上次保養時數高，避免錯誤回報
+        if (currentHoursNum < lastMaintenanceHours) {
+          return replyToUser(
+            event.replyToken,
+            `⚠️ 異常回報！當前運轉時數 (${currentHoursNum}H) 低於上次保養時數 (${lastMaintenanceHours}H)，請確認後重新輸入。`
+          );
+        }
+
         let replyMessage = `✅ 設備回報成功！\n📌 設備編號: ${equipmentId}\n📅 日期: ${date}\n🏠 地點: ${location}\n🔄 設備狀態: ${status}\n⏳ 當前運轉時數: ${currentHours}H`;
 
         if (lastMaintenanceDate && lastMaintenanceDate !== "未知") {
@@ -548,20 +562,6 @@ async function handleEvent(event) {
         } else if (hourDiff >= 250 && 第一道柴油是否更換 === 0) {
           // 只有當柴油未更換時才提醒
           replyMessage += `\n⚠️ 提醒：設備 **${equipmentId}** 需要 **更換第一道柴油**，已運轉 **			${hourDiff}H**。\n請更換完畢後回報 **更換第一道柴油** 以解除提醒。`;
-        }
-
-        const [deviceRows] = await db.query(
-          "SELECT 設備編號, 上次保養時數 FROM 設備資料表 WHERE 設備編號 = ?",
-          [equipmentId]
-        );
-        lastMaintenanceHours = parseInt(deviceRows[0].上次保養時數, 10) || 0;
-
-        // 確保新的運轉時數比上次保養時數高，避免錯誤回報
-        if (currentHoursNum < lastMaintenanceHours) {
-          return replyToUser(
-            event.replyToken,
-            `⚠️ 異常回報！當前運轉時數 (${currentHoursNum}H) 低於上次保養時數 (${lastMaintenanceHours}H)，請確認後重新輸入。`
-          );
         }
 
         // **當使用者回報"保養完成"，重置柴油更換狀態**
