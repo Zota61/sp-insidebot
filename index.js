@@ -125,6 +125,8 @@ async function handleUserPermission(userMessage, userId) {
   if (userMessage === "我的ID" || userMessage === "6️⃣ 我的ID") {
     result = `👤 **你的 LINE User ID**：\n${userId}`;
   }
+
+  return result;
 }
 // **設定 Rich Menu**
 async function handleEvent(event) {
@@ -140,7 +142,6 @@ async function handleEvent(event) {
       userMessage,
       userId
     );
-    console.log(resultUserPermission, " = resultUserPermission");
     if (resultUserPermission) {
       return replyToUser(event.replyToken, resultUserPermission);
     }
