@@ -53,14 +53,9 @@ const db = mysql.createPool({
   connectionLimit: 10,
   queueLimit: 0,
 });
-
 const moment = require("moment"); // 確保已安裝 moment.js 來處理日期格式
 
 async function handleUserPermission(userMessage, userId) {
-  const DEVELOPER_USER_ID = process.env.DEVELOPER_USER_ID; // 開發者 ID
-  let dynamicAdmins = new Set(
-    process.env.ADMIN_USER_IDS ? process.env.ADMIN_USER_IDS.split(",") : []
-  );
   let result;
 
   // **處理管理員相關指令**
