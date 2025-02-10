@@ -585,6 +585,6 @@ app.post("/webhook", line.middleware(config), async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 伺服器運行中，監聽 ${PORT} 端口`);
 });
