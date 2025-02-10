@@ -140,6 +140,7 @@ async function handleEvent(event) {
       userMessage,
       userId
     );
+    console.log(resultUserPermission, " = resultUserPermission");
     if (resultUserPermission) {
       return replyToUser(event.replyToken, resultUserPermission);
     }
