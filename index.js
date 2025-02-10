@@ -91,8 +91,18 @@ async function handleEvent(event) {
       }
 
       const deviceId = parts[1];
-      let runHours = parts[2] ? parts[2].replace(/\D/g, "") : null; // 確保即使 parts[3] 不存在，也能解析
-      const status = "回庫"; // 預設值
+      let status = "回庫"; // 預設值
+      switch (parts[2]) {
+        case "出庫":
+        case "回庫":
+        case "保養完成":
+        case "更換第一道柴油":
+          status = parts[2];
+          runHours = parts[3] ? parts[3].replace(/\D/g, "") : null;
+          break;
+        default:
+          runHours = parts[2] ? parts[2].replace(/\D/g, "") : null;
+      }
       const time = new Date().toISOString().split("T")[0]; // 預設當前時間
       const location = "倉庫"; // 預設地點
 
