@@ -56,7 +56,7 @@ const db = mysql.createPool({
 
 const moment = require("moment"); // 確保已安裝 moment.js 來處理日期格式
 
-async function handleUserPermission(userMessage) {
+async function handleUserPermission(userMessage, userId) {
   const DEVELOPER_USER_ID = process.env.DEVELOPER_USER_ID; // 開發者 ID
   let dynamicAdmins = new Set(
     process.env.ADMIN_USER_IDS ? process.env.ADMIN_USER_IDS.split(",") : []
@@ -136,7 +136,10 @@ async function handleEvent(event) {
     console.log("📩 收到訊息:", userMessage);
     const userId = event.source.userId;
 
-    const resultUserPermission = await handleUserPermission(userMessage);
+    const resultUserPermission = await handleUserPermission(
+      userMessage,
+      userId
+    );
     if (resultUserPermission) {
       return replyToUser(event.replyToken, resultUserPermission);
     }
