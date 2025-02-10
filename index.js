@@ -162,10 +162,24 @@ async function handleEvent(event) {
       }
 
       const deviceId = parts[1];
-      const status = parts[2] || null;
-      let runHours = parts[3] || null;
-      const time = parts[4] || null;
-      const location = parts[5] || null;
+      let status = "回庫"; // 預設值
+      let time = new Date().toISOString().split("T")[0];
+      let location = "倉庫";
+      switch (parts[2]) {
+        case "出庫":
+        case "回庫":
+        case "保養完成":
+        case "更換第一道柴油":
+          status = parts[2];
+          runHours = parts[3] ? parts[3].replace(/\D/g, "") : null;
+          time = parts[4] ?? null;
+          location = parts[5] ?? null;
+          break;
+        default:
+          runHours = parts[2] ? parts[2].replace(/\D/g, "") : null;
+          time = parts[3] ?? null;
+          location = parts[4] ?? null;
+      }
 
       try {
         const [rows] = await db.query(
@@ -475,87 +489,6 @@ async function handleEvent(event) {
         console.error("❌ LINE 訊息處理錯誤:", error);
       }
     }
-  } catch (error) {
-    console.error("設備回報錯誤：", error);
-    return "❌ 發生錯誤，請稍後再試！";
-  }
-}
-
-async function processEquipmentReport(userMessage, userId) {
-  try {
-    // 解析使用者輸入，例如："100K-3 回庫 1000H 20250207 台北"
-    let parts = userMessage.split(" ");
-    if (parts.length < 4) {
-      return "❌ 格式錯誤！請使用格式：\n設備編號 狀態 運轉時數 日期(可省略) 地點\n範例：100K-3 回庫 1000H 20250207 台北";
-    }
-
-    let [equipmentId, status, runtime, date, location] = parts;
-
-    // 如果日期缺少，自動補上今天的日期
-    if (!date || !moment(date, "YYYYMMDD", true).isValid()) {
-      date = moment().format("YYYYMMDD"); // 設定為當天日期
-    }
-
-    // 檢查設備狀態是否合法
-    const validStatuses = ["出庫", "回庫", "更換第一道柴油", "保養完成"];
-    if (!validStatuses.includes(status)) {
-      return "❌ 錯誤！設備狀態必須是：「出庫」、「回庫」、「更換第一道柴油」、「保養完成」";
-    }
-
-    // 運轉時數檢查
-    let runtimeHours = parseInt(runtime.replace("H", ""), 10);
-    if (isNaN(runtimeHours)) {
-      return "❌ 錯誤！運轉時數必須是數字 + H，例如 1000H";
-    }
-
-    // 查詢設備的上次保養紀錄
-    const query =
-      "SELECT 上次保養時間, 上次保養時數, 第一道柴油是否更換 FROM 設備資料表 WHERE 設備編號 = ?";
-    const [lastMaintenanceRows] = await db.query(query, [equipmentId]);
-
-    let lastMaintenanceTime = "未知";
-
-    let dieselChangeStatus = 0; // 預設為 0（尚未更換）
-
-    if (lastMaintenanceRows.length > 0) {
-      lastMaintenanceTime = lastMaintenanceRows[0].上次保養時間 || "未知";
-      lastMaintenanceHours = lastMaintenanceRows[0].上次保養時數 || 0;
-      dieselChangeStatus = lastMaintenanceRows[0]["第一道柴油是否更換"] ?? 0; // 防止 undefined 錯誤
-    }
-
-    // 計算距離上次保養的時數
-    let hoursSinceLastMaintenance = runtimeHours - (lastMaintenanceHours || 0);
-
-    // 確保設備存在，否則請先新增
-    const [equipmentRows] = await db.query(
-      "SELECT * FROM 設備資料表 WHERE 設備編號 = ?",
-      [equipmentId]
-    );
-
-    if (!equipmentRows || equipmentRows.length === 0) {
-      return `❌ 設備 ${equipmentId} 不存在，請先新增設備。`;
-    }
-
-    // 如果設備存在，則更新設備狀態、運轉時數、日期、使用地點
-    const updateQuery = `
-            UPDATE 設備資料表
-            SET 設備狀態 = ?, 運轉時數 = ?, 日期 = ?, 使用地點 = ?
-            WHERE 設備編號 = ?
-        `;
-    await db.query(updateQuery, [
-      status,
-      runtimeHours,
-      date,
-      location,
-      equipmentId,
-    ]);
-
-    // 回傳回應
-    return `✅ 設備 ${equipmentId} 更新成功！\n📌 狀態：${status}\n⏳ 運轉時數：${runtimeHours}H\n📅 日期：${date}\n📍 地點：${location}\n\n📌 上次保養：${moment(
-      lastMaintenanceTime
-    ).format(
-      "YYYY/MM/DD"
-    )}\n📌 上次保養：${lastMaintenanceHours}\n🛠️ 距離保養：${hoursSinceLastMaintenance}H`;
   } catch (error) {
     console.error("設備回報錯誤：", error);
     return "❌ 發生錯誤，請稍後再試！";
