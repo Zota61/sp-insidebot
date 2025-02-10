@@ -30,7 +30,7 @@ cd /<<path>>
 > 啟動新的 server need open firewall port 
 
 
-
+git push
 註冊 Cloudflare（Cloudflare 官網）
 安裝 Cloudflare Tunnel
 bash

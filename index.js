@@ -422,7 +422,42 @@ async function handleEvent(event) {
         return replyToUser(event.replyToken, "⚠️ 伺服器發生錯誤，請稍後再試。");
       }
     }
+// 📌 查詢設備
+if (userMessage.startsWith("查詢設備 ")) {
+    const parts = userMessage.split(" ");
+    if (parts.length < 2) {
+        return replyToUser(event.replyToken, "❌ 格式錯誤，請使用「查詢設備 設備編號」\n範例：查詢設備 100K-3");
+    }
 
+    const equipmentId = parts[1];
+
+    try {
+        const [rows] = await db.query("SELECT * FROM 設備資料表 WHERE 設備編號 = ?", [equipmentId]);
+
+        if (rows.length === 0) {
+            return replyToUser(event.replyToken, `❌ 找不到設備：${equipmentId}`);
+        }
+
+        const device = rows[0];
+        const formattedDate = moment(device.日期).format("YYYY/MM/DD");
+        const lastMaintenance = device.上次保養時間 ? moment(device.上次保養時間).format("YYYY/MM/DD HH:mm:ss") : "未知";
+
+        const message = 
+            `📋 **設備資訊**\n` +
+            `📌 設備編號：${device.設備編號}\n` +
+            `🔄 設備狀態：${device.設備狀態 || "未知"}\n` +
+            `⏳ 當前運轉時數：${device.運轉時數}H\n` +
+            `📅 記錄日期：${formattedDate}\n` +
+            `🏠 位置：${device.使用地點 || "未知"}\n` +
+            `🛠️ 上次保養時間：${lastMaintenance}\n` +
+            `⏳ 上次保養時數：${device.上次保養時數 || 0}H`;
+
+        return replyToUser(event.replyToken, message);
+    } catch (error) {
+        console.error("❌ 查詢設備錯誤:", error);
+        return replyToUser(event.replyToken, "⚠️ 查詢設備失敗，請稍後再試。");
+    }
+}
     // **功能指引**
     if (userMessage === "範本") {
       return replyToUser(
@@ -434,7 +469,76 @@ async function handleEvent(event) {
     if (userMessage === "功能選單") {
       return replyToUser(
         event.replyToken,
-        "📋 功能選單：\n1️⃣ 查詢設備\n2️⃣ 查看設備列表（管理員限定）\n3️⃣ 我的 ID"
+        "📋 功能選單：1️⃣\n設備回報-輸入 範本可參考回報格式\n2️⃣ 設備查詢\n3️⃣ 新增設備\n4️⃣ 移除設備\n5️⃣ 查看設備列表 \n6️⃣ 新增管理\n7️⃣ 移除管理\n8️⃣ 查看管理者\n9️⃣ 我的ID"
+          {
+        accessorKey: 'to',
+        header: t('toHeader'),
+        muiEditTextFieldProps: {
+          required: true,
+          error: !!validationErrors?.to,
+          helperText: validationErrors?.to,
+          onBlur: () => {
+            return setValidationErrors({
+              ...validationErrors,
+              to: undefined,
+            });
+          },
+        },
+        Cell: ({cell}: any) => (
+          <>
+            <EmailMultiSelect cell={cell} />
+          </>
+        ),
+        Edit: ({cell, row, column}: any) => (
+          <div style={{padding: '8px', minWidth: '250px'}}>
+            <span
+              style={{
+                display: 'block',
+                marginBottom: '4px',
+                color: '#757575',
+                fontSize: '14px',
+              }}
+            >
+              {t('toHeader')} <span style={{color: 'red'}}>*</span>
+            </span>
+            <EmailMultiSelect cell={cell} row={row} column={column} />
+          </div>
+        ),
+      },  {
+        accessorKey: 'to',
+        header: t('toHeader'),
+        muiEditTextFieldProps: {
+          required: true,
+          error: !!validationErrors?.to,
+          helperText: validationErrors?.to,
+          onBlur: () => {
+            return setValidationErrors({
+              ...validationErrors,
+              to: undefined,
+            });
+          },
+        },
+        Cell: ({cell}: any) => (
+          <>
+            <EmailMultiSelect cell={cell} />
+          </>
+        ),
+        Edit: ({cell, row, column}: any) => (
+          <div style={{padding: '8px', minWidth: '250px'}}>
+            <span
+              style={{
+                display: 'block',
+                marginBottom: '4px',
+                color: '#757575',
+                fontSize: '14px',
+              }}
+            >
+              {t('toHeader')} <span style={{color: 'red'}}>*</span>
+            </span>
+            <EmailMultiSelect cell={cell} row={row} column={column} />
+          </div>
+        ),
+      },"
       );
     }
     // **檢查管理員權限**
