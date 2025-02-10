@@ -113,27 +113,53 @@ async function handleEvent(event) {
         );
       }
 
-      try {
-        await db.query(
-          `INSERT INTO 設備資料表 (設備編號, 設備狀態, 運轉時數, 日期, 使用地點) 
+      const [equipmentRows] = await db.query(
+        "SELECT * FROM 設備資料表 WHERE 設備編號 = ?",
+        [equipmentId]
+      );
+
+      if (!equipmentRows || equipmentRows.length === 0) {
+        try {
+          await db.query(
+            `INSERT INTO 設備資料表 (設備編號, 設備狀態, 運轉時數, 日期, 使用地點) 
      	VALUES (?, ?, ?, ?, ?)
      	ON DUPLICATE KEY UPDATE 
      	設備狀態 = VALUES(設備狀態), 
      	運轉時數 = VALUES(運轉時數), 
      	日期 = VALUES(日期), 
      	使用地點 = VALUES(使用地點)`,
-          [deviceId, status, runHours, time, location]
-        );
-        return replyToUser(
-          event.replyToken,
-          `✅ 設備 ${deviceId} 已成功新增或更新！`
-        );
-      } catch (error) {
-        console.error("❌ 新增設備錯誤:", error);
-        return replyToUser(
-          event.replyToken,
-          `❌ 新增設備失敗，錯誤碼: ${error.code}`
-        );
+            [deviceId, status, runHours, time, location]
+          );
+          return replyToUser(
+            event.replyToken,
+            `✅ 設備 ${deviceId} 已成功新增或更新！`
+          );
+        } catch (error) {
+          console.error("❌ 新增設備錯誤:", error);
+          return replyToUser(
+            event.replyToken,
+            `❌ 新增設備失敗，錯誤碼: ${error.code}`
+          );
+        }
+      } else {
+        const updateQuery = `
+            UPDATE 設備資料表
+            SET 設備狀態 = ?, 運轉時數 = ?, 日期 = ?, 使用地點 = ?
+            WHERE 設備編號 = ?
+        `;
+        await db.query(updateQuery, [
+          status,
+          runtimeHours,
+          date,
+          location,
+          equipmentId,
+        ]);
+        // 回傳回應
+        return `✅ 設備 ${equipmentId} 更新成功！\n📌 狀態：${status}\n⏳ 運轉時數：${runtimeHours}H\n📅 日期：${date}\n📍 地點：${location}\n\n📌 上次保養：${moment(
+          lastMaintenanceTime
+        ).format(
+          "YYYY/MM/DD"
+        )}\n📌 上次保養：${lastMaintenanceHours}\n🛠️ 距離保養：${hoursSinceLastMaintenance}H`;
       }
     }
 
