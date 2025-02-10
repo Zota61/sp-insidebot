@@ -55,6 +55,77 @@ const db = mysql.createPool({
 });
 
 const moment = require("moment"); // 確保已安裝 moment.js 來處理日期格式
+
+async function handleUserPermission(userMessage) {
+  const DEVELOPER_USER_ID = process.env.DEVELOPER_USER_ID; // 開發者 ID
+  let dynamicAdmins = new Set(
+    process.env.ADMIN_USER_IDS ? process.env.ADMIN_USER_IDS.split(",") : []
+  );
+  let result;
+
+  // **處理管理員相關指令**
+  if (userMessage === "查看管理者" || userMessage === "3️⃣ 查看管理者") {
+    if (!dynamicAdmins.has(userId)) {
+      result = "❌ 你沒有權限查看管理者。";
+    }
+
+    const adminList = Array.from(dynamicAdmins)
+      .map((admin, index) => `#${index + 1} - ${admin}`)
+      .join("\n");
+    result = `👮‍♂️ **目前管理員列表**：\n${adminList || "⚠️ 尚無管理員"}`;
+  }
+
+  // **新增管理員（限開發者）**
+  if (
+    userMessage.startsWith("新增管理 ") ||
+    userMessage.startsWith("4️⃣ 新增管理 ")
+  ) {
+    if (userId !== DEVELOPER_USER_ID) {
+      result = "❌ 你沒有權限新增管理員。";
+    }
+
+    const parts = userMessage.split(" ");
+    if (parts.length < 2) {
+      result = "⚠️ 格式錯誤！請使用「新增管理 {UserID}」";
+    }
+
+    const newAdminId = parts[1];
+    if (dynamicAdmins.has(newAdminId)) {
+      result = "⚠️ 該使用者已經是管理員！";
+    }
+
+    dynamicAdmins.add(newAdminId);
+    result = `✅ 已成功新增管理員：${newAdminId}`;
+  }
+
+  // **移除管理員（限開發者）**
+  if (
+    userMessage.startsWith("移除管理 ") ||
+    userMessage.startsWith("5️⃣ 移除管理 ")
+  ) {
+    if (userId !== DEVELOPER_USER_ID) {
+      result = "❌ 你沒有權限移除管理員。";
+    }
+
+    const parts = userMessage.split(" ");
+    if (parts.length < 2) {
+      result = "⚠️ 格式錯誤！請使用「移除管理 {UserID}」";
+    }
+
+    const removeAdminId = parts[1];
+    if (!dynamicAdmins.has(removeAdminId)) {
+      result = "⚠️ 該使用者不是管理員！";
+    }
+
+    dynamicAdmins.delete(removeAdminId);
+    result = `✅ 已成功移除管理員：${removeAdminId}`;
+  }
+
+  // **查看自己的 LINE User ID**
+  if (userMessage === "我的ID" || userMessage === "6️⃣ 我的ID") {
+    result = `👤 **你的 LINE User ID**：\n${userId}`;
+  }
+}
 // **設定 Rich Menu**
 async function handleEvent(event) {
   try {
@@ -64,6 +135,12 @@ async function handleEvent(event) {
     const userMessage = event.message.text.trim();
     console.log("📩 收到訊息:", userMessage);
     const userId = event.source.userId;
+
+    const resultUserPermission = await handleUserPermission(userMessage);
+    if (resultUserPermission) {
+      return replyToUser(event.replyToken, resultUserPermission);
+    }
+
     // 🔹 新增設備
     if (userMessage === "新增設備") {
       return replyToUser(
@@ -115,7 +192,7 @@ async function handleEvent(event) {
 
       const [equipmentRows] = await db.query(
         "SELECT * FROM 設備資料表 WHERE 設備編號 = ?",
-        [equipmentId]
+        [deviceId]
       );
 
       if (!equipmentRows || equipmentRows.length === 0) {
@@ -152,10 +229,10 @@ async function handleEvent(event) {
           runtimeHours,
           date,
           location,
-          equipmentId,
+          deviceId,
         ]);
         // 回傳回應
-        return `✅ 設備 ${equipmentId} 更新成功！\n📌 狀態：${status}\n⏳ 運轉時數：${runtimeHours}H\n📅 日期：${date}\n📍 地點：${location}\n\n📌 上次保養：${moment(
+        return `✅ 設備 ${deviceId} 更新成功！\n📌 狀態：${status}\n⏳ 運轉時數：${runtimeHours}H\n📅 日期：${date}\n📍 地點：${location}\n\n📌 上次保養：${moment(
           lastMaintenanceTime
         ).format(
           "YYYY/MM/DD"
@@ -253,8 +330,6 @@ async function handleEvent(event) {
           updateValues
         );
 
-        // const replyMessage = await processEquipmentReport(userMessage, userId);
-
         return replyToUser(
           event.replyToken,
           `✅ 設備 ${deviceId} 已成功更新！`
@@ -349,7 +424,7 @@ async function handleEvent(event) {
     }
 
     // **功能指引**
-    if (userMessage === "輸入範本") {
+    if (userMessage === "範本") {
       return replyToUser(
         event.replyToken,
         "請輸入以下格式：\n1.設備編號: 例100K-3\n2.設備狀態: 例出庫, 回庫, 更換第一道柴油, 保養完成\n3.當前運轉時數: 例1000H\n4.日期: 例2029/07/09\n5.使用地點: 例台北大佳河濱公園"
