@@ -30,7 +30,7 @@ cd /<<path>>
 > 啟動新的 server need open firewall port 
 
 
-有更新的話 Visual 要註記更新內容 打勾後再 輸入指令git push
+有更新的話 Visual 要註記更新內容 打勾後再 用CTRL+~叫出提示窗 輸入指令git push
 然後到虛擬機內輸入git pull
 虛擬機下載完檔案後 輸入Github使用者帳戶名稱 
 輸入github使用者密碼(需要去github官網看CODE或存記事本)

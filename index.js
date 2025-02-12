@@ -227,12 +227,12 @@ async function handleEvent(event) {
         await db.query(updateQuery, [
           status,
           runHours,
-          date,
+          time,
           location,
           deviceId,
         ]);
         // 回傳回應
-        return `✅ 設備 ${deviceId} 更新成功！\n📌 狀態：${status}\n⏳ 運轉時數：${runtimeHours}H\n📅 日期：${date}\n📍 地點：${location}\n\n📌 上次保養：${moment(
+        return `✅ 設備 ${deviceId} 更新成功！\n📌 狀態：${status}\n⏳ 運轉時數：${runHours}H\n📅 日期：${time}\n📍 地點：${location}\n\n📌 上次保養：${moment(
           lastMaintenanceTime
         ).format(
           "YYYY/MM/DD"
