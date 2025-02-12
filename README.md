@@ -30,7 +30,18 @@ cd /<<path>>
 > 啟動新的 server need open firewall port 
 
 
-git push
+有更新的話 Visual 要註記更新內容 打勾後再 輸入指令git push
+然後到虛擬機內輸入git pull
+虛擬機下載完檔案後 輸入Github使用者帳戶名稱 
+輸入github使用者密碼(需要去github官網看CODE或存記事本)
+輸入指令docker-compose up --build -d 
+要看LOG的話再輸入docker logs -f linebot-nodejs
+
+進入SSH後
+cd projects   //進入專案資料夾
+cd cd sp-insidebot    //進入資料夾 
+sudo su root    //進入超級使用者權限 後就可以輸入指令了 
+
 註冊 Cloudflare（Cloudflare 官網）
 安裝 Cloudflare Tunnel
 bash
