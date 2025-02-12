@@ -226,7 +226,7 @@ async function handleEvent(event) {
         `;
         await db.query(updateQuery, [
           status,
-          runtimeHours,
+          runHours,
           date,
           location,
           deviceId,
