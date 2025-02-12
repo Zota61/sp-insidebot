@@ -191,7 +191,7 @@ async function handleEvent(event) {
       }
 
       const [equipmentRows] = await db.query(
-        "SELECT 設備編號, 設備狀態, 運轉時數, 日期, 使用地點, 上次保養時間, 上次運轉時數 FROM 設備資料表 WHERE 設備編號 = ?",
+        "SELECT 設備編號, 設備狀態, 運轉時數, 日期, 使用地點, 上次保養時間, 上次保養時數 FROM 設備資料表 WHERE 設備編號 = ?",
         [deviceId]
       );
       // 確保變數有值，避免 ReferenceError
