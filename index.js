@@ -169,6 +169,7 @@ async function handleEvent(event) {
 
       const deviceId = parts[1];
       let status = "回庫"; // 預設值
+      let runHours;
       switch (parts[2]) {
         case "出庫":
         case "回庫":
@@ -200,7 +201,7 @@ async function handleEvent(event) {
 
       if (equipmentRows.length > 0) {
         lastMaintenanceTime = equipmentRows[0].上次保養時間 || null;
-        lastMaintenanceHours = equipmentRows[0].上次運轉時數 || 0;
+        lastMaintenanceHours = equipmentRows[0].上次保養時數 || 0;
       }
 
       if (!equipmentRows || equipmentRows.length === 0) {
@@ -239,6 +240,8 @@ async function handleEvent(event) {
           location,
           deviceId,
         ]);
+        let hoursSinceLastMaintenance = runHours - (lastMaintenanceHours || 0);
+
         // 回傳回應
         return `✅ 設備 ${deviceId} 更新成功！\n📌 狀態：${status}\n⏳ 運轉時數：${runHours}H\n📅 日期：${time}\n📍 地點：${location}\n\n📌 上次保養：${moment(
           lastMaintenanceTime
@@ -275,6 +278,7 @@ async function handleEvent(event) {
       const deviceId = parts[1];
       let status = "回庫"; // 預設值
       let time = new Date().toISOString().split("T")[0];
+      let runHours;
       let location = "倉庫";
       switch (parts[2]) {
         case "出庫":
