@@ -173,11 +173,11 @@ const handleEvent = async event => {
         let hoursSinceLastMaintenance = runHours - (lastMaintenanceHours || 0);
         return replyToUser(
           event.replyToken,
-          `✅ 設備 ${deviceId} 更新成功！\n📌 狀態：${status}\n⏳ 運轉時數：${runHours}H\n📅 日期：${time}\n📍 地點：${location}\n\n📌 上次保養：${moment(
-            lastMaintenanceTime,
-          ).format(
-            'YYYY/MM/DD',
-          )}\n📌 上次保養：${lastMaintenanceHours}\n🛠️ 距離保養：${hoursSinceLastMaintenance}H`,
+          `✅ 設備 ${deviceId} 更新成功！\n📌 狀態：${status}\n⏳ 運轉時數：${runHours}H\n📅 日期：${time}\n📍 地點：${location}\n\n📌 上次保養時間：${
+            lastMaintenanceTime
+              ? moment(lastMaintenanceTime).format('YYYY/MM/DD')
+              : null
+          }\n📌 上次保養時數：${lastMaintenanceHours}\n🛠️ 距離保養：${hoursSinceLastMaintenance}H`,
         );
       }
     }
