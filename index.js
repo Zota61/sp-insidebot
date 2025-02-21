@@ -4,19 +4,14 @@ require('dotenv').config();
 const express = require('express');
 
 const app = express();
-const PORT = process.env.PORT || 8080; // Cloud Run 需要監聽 8080
+const PORT = process.env.PORT || 8080;
 
 // **環境變數檢查**
 const requiredEnv = [
   'LINE_ACCESS_TOKEN',
   'LINE_CHANNEL_SECRET',
-  'DB_HOST',
-  'DB_USER',
-  'DB_PASS',
-  'DB_NAME',
-  'DB_PORT',
-  'DEVELOPER_USER_ID',
-  'ADMIN_USER_IDS',
+  'ZUSERS_API_PREFIX',
+  'ZUSERS_PLATFORM_ID',
 ];
 const missingEnv = requiredEnv.filter(env => !process.env[env]);
 
