@@ -499,12 +499,11 @@ const handleEvent = async event => {
 
         // **提醒機制：只在柴油更換狀態為 0 時提醒**
         const hourDiff = currentHoursNum - lastMaintenanceHoursNum;
-
         if (hourDiff >= 450) {
           replyMessage += `\n⚠️ 提醒：設備 **${equipmentId}** 需要 **大保養**，已運轉 **${hourDiff}H**。		\n請保養完成後回報 **保養完成** 以解除提醒。`;
         } else if (
           hourDiff >= 250 &&
-          getPlatformDevice.isFirstDieselReplaced === false
+          getPlatformDevice.data?.isFirstDieselReplaced === false
         ) {
           // 只有當柴油未更換時才提醒
           replyMessage += `\n⚠️ 提醒：設備 **${equipmentId}** 需要 **更換第一道柴油**，已運轉 **			${hourDiff}H**。\n請更換完畢後回報 **更換第一道柴油** 以解除提醒。`;
