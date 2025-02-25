@@ -609,10 +609,6 @@ const handleEvent = async event => {
         console.error('❌ LINE 訊息處理錯誤:', error);
       }
     }
-    return replyToUser(
-      event.replyToken,
-      `❌找不到相關指令，請嘗試 \n\n ${helperText}`,
-    );
   } catch (error) {
     console.error('設備回報錯誤：', error);
     return replyToUser(event.replyToken, '❌ 發生錯誤，請稍後再試！');
