@@ -1,7 +1,7 @@
 const PREFIX = process.env.ZUSERS_API_PREFIX;
 const PLATFORM_ID = process.env.ZUSERS_PLATFORM_ID;
 async function LinebotSignin(data) {
-  const {userId} = data;
+  const {userId, type, groupId} = data;
   const response = await fetch(`${PREFIX}/auth/linebot/signin`, {
     method: 'POST',
     headers: {
@@ -10,6 +10,8 @@ async function LinebotSignin(data) {
     },
     body: JSON.stringify({
       userId,
+      type,
+      groupId,
     }),
   });
 

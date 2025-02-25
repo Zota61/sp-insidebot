@@ -25,8 +25,11 @@ const handleEvent = async event => {
     }
     const userMessage = event.message.text.trim();
     const userId = event.source.userId;
+
     const [user, singinStatus] = await LinebotSignin({
       userId,
+      type: event.source.type,
+      groupId: event.source.groupId,
     });
     if (singinStatus !== HttpStatusCode.Ok) {
       return replyToUser(event.replyToken, JSON.stringify(user));
