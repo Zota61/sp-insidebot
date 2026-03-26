@@ -532,6 +532,7 @@ const handleEvent = async event => {
                   lastMaintenanceDate: formattedDate,
                   lastMaintenanceHours: currentHoursNum,
                   isFirstDieselReplaced: false,
+                  note,
                 },
                 token,
               );
@@ -569,6 +570,7 @@ const handleEvent = async event => {
                 date,
                 location,
                 isFirstDieselReplaced: true,
+                note,
               },
               token,
             );
