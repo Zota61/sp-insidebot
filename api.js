@@ -28,6 +28,7 @@ async function CreatePlatformDevice(data, token) {
     lastMaintenanceDate,
     isFirstDieselReplaced,
     date,
+    note,
   } = data || {};
   let {lastMaintenanceHours, runHours} = data || {};
   if (runHours) {
@@ -55,6 +56,7 @@ async function CreatePlatformDevice(data, token) {
       lastMaintenanceDate,
       isFirstDieselReplaced,
       date,
+      note,
     }),
   });
 
@@ -70,6 +72,7 @@ async function UpdatePlatformDevice(id, data, token) {
     status,
     location,
     date,
+    note,
   } = data || {};
   let {lastMaintenanceHours, runHours} = data || {};
   if (runHours) {
@@ -95,6 +98,7 @@ async function UpdatePlatformDevice(id, data, token) {
       lastMaintenanceHours,
       isFirstDieselReplaced,
       date,
+      note,
     }),
   });
 
